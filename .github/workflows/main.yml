@@ -1,0 +1,41 @@
+name: Wone
+
+on:
+  workflow_dispatch:
+  push: 
+   branches: ["main"]
+
+env:
+  aws-region: us-east-1
+  
+jobs:
+  terraform1:
+    name: terraform
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Modules
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Terraform HasiCorp SetUp
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version:  1.2.6
+
+      - name: AWS Credentials Configuration
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ env.aws-region }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+      
+      - name: terraform init
+        run: 
+          terraform init
+      - name: terraform destroy
+        run:
+          terraform destroy -auto-approve
